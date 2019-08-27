@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout.html}">
+<head>
+</head>
+<body>
+<section layout:fragment="content">
+
+    <div th:if="${claim}" class="alert alert-success">
+        We have sent you <span th:text="${claim.reward}"></span> <span th:text="${settings.shortcut}"></span> to <strong th:text="${claim.targetAddress}"></strong>
+        in transaction <strong th:text="${claim.txid}"></strong>.
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-warning">
+        <strong>Error #<span th:text="${errorCode}"></span></strong> <span th:text="${errorMessage}"></span>
+    </div>
+
+    <form th:action="@{/mine}" method="post" th:object="${addressForm}">
+        <table class="col-sm-7" style="margin:auto;">
+            <tr>
+                <td>
+                    <div class="input-group">
+                        <input type="text"
+                               th:field="*{address}"
+                               class="form-control"
+                               autofocus="autofocus"
+                               th:placeholder="${settings.coinName} + ' address'">
+
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-primary ">
+                                <i class="fa fa-cog"></i> Start
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="form-error-msg">Address Error</span><span>&nbsp;</span>
+                </td>
+            </tr>
+        </table>
+    </form>
+
+    <div class="col-xs-12" style="height:15px;"></div>
+
+    <p class="text-justify"><span th:text="${settings.coinName}"></span> Faucet is a proof of work faucet inspired by <a href="https://en.wikipedia.org/wiki/Hashcash">Hashcash</a>. Draining of
+        the faucet is prevented by requiring the user to provide a proof of work over a server created challenge and through limiting frequency of sessions from each IP address.
+        The more work the user proves, the more coins the server sends. The user can thus obtain a small amount
+        of coins fairly quickly or they can decide to let their computer calculate slightly longer in order to get more
+        coins. All basic parameters and limits are configurable on the server.</p>
+
+    <p>The faucet operates in following steps:</p>
+
+    <ol>
+        <li>The user requests the main page, fills in the target <span th:text="${settings.shortcut}"></span> address and submits the form.</li>
+        <li class="text-justify">
+            The server creates a session for the user which consists of the user's IP address, the target <span th:text="${settings.shortcut}"></span> address <span class="math-term">A</span>, the timestamp <span class="math-term">T</span>, and a random challenge <span class="math-term">C</span>.
+            The server sends the challenge <span class="math-term">C</span> back to the user.
+        </li>
+        <li class="text-justify">The user starts to calculate responses <span class="math-term">R<sub>i</sub> = SHA512(i | C)</span> while incrementing the nonce
+            <span class="math-term">i</span>. The user keeps the lowest <span class="math-term">R<sub>i</sub></span> value as its best result.
+            As long as the best result is lower than the required limit for the minimal payout, the user can end the computation at any time by
+            submitting the results to the server. The submission of the result includes the challenge <span class="math-term">C</span> and
+            the nonce <span class="math-term">i</span>. If the user does not stop the computation, the client script tries to find the best solution
+            for <span th:text="${settings.clientWorkTime}"></span> seconds and then submits the best result automatically. The client script also stops the computation and submits the result if the minimal hash, which guarantees the maximal payout, is reached.</li>
+        <li class="text-justify">Given the user's IP address, challenge <span class="math-term">C</span> and nonce <span class="math-term">i</span>, the server can look up the session of the user in its in-memory database,
+            from which it checks that the challenge still exists, the
+            timestamp <span class="math-term">T</span> is not older than the maximal submission time (<span th:text="${settings.maxSessionTime}"></span> seconds), and that
+            <span class="math-term">R<sub>i</sub> = <span th:text="${settings.hashFunction.toUpperCase()}"></span>(i | C)</span> is below the configurable minimum required limit for the minimal payout. Then the
+            server calculates the number of coins <span class="math-term">V</span> to send to the user's address <span class="math-term">A</span> using
+            formula <span class="math-term">V = ((2<sup th:text="${settings.hashSize}"></sup> - 1) / R<sub>i</sub>) / Q</span>, where <span class="math-term">Q</span> is configurable coefficient
+            that specifies how many hashes is the user expected to calculate to be rewarded with 1 <span th:text="${settings.shortcut}"></span>.
+            The server then marks the user's session in its in-memory database as completed.</li>
+    </ol>
+
+    <p class="text-justify">The session is evicted from the server's in-memory database after the maximal submission time. If the user submits the form before the previous session is completed, a new session is created. However, if the previous session is completed, the user is not allowed to create a new session until the previous one is evicted.</p>
+</section>
+
+<section layout:fragment="js">
+    <script th:src="@{/js/index.js}"></script>
+</section>
+</body>
+</html>

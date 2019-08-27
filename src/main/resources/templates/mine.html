@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout.html}">
+<head>
+
+</head>
+<body>
+        <section layout:fragment="content">
+            <div class="mining-inner">
+                <div class="text-large">
+                    <span th:text="${settings.coinName}"></span> Faucet
+                    <svg class="heart" viewBox="0 0 32 29.6" style="margin-left:10px">
+                        <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
+    c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z" />
+                    </svg>
+                </div>
+                <div class="text-medium" style="margin-top:20px">
+                    <span th:text="${userData.targetAddress}"></span>
+                </div>
+                <br>
+                <div class="text-medium">
+                    <div>Best result: <span id="bestHashSpan" class="monospace" style="color:#800000">ffffffffffffffffffffffffffffffff…</span></div>
+                    <div>Hashes calculated: <span id="hashCountSpan">0</span></div>
+                    <div>Hash rate: <span id="hashRateSpan">0</span> hashes/second</div>
+                </div>
+                <br>    
+
+                <div id="mining-progress">
+                    <p>Mining in progress. Please wait ...</p>
+                    <p>Automatic submission in <span id="mining-countdown" th:text="${settings.clientWorkTime}"></span> seconds.</p>
+                </div>
+
+                <div class="col-xs-12" style="height:15px;"></div>
+
+                <form id="claimform" th:action="@{/claim}" method="post" th:object="${claimForm}">
+                    <input type="hidden"
+                           th:field="*{bestHash}"
+                           id="bestHashInput"
+                           class="form-control">
+
+                    <input type="hidden"
+                           th:field="*{seed}"
+                           class="form-control">
+
+                    <button id="claimbtn" type="submit" class="btn btn-primary" disabled><span id="mining-reward">No proof of work yet</span></button>
+                </form>
+
+                <!-- <a th:href="@{/}">Back</a>-->
+            </div>
+        </section>
+
+        <section layout:fragment="js">
+            <script src="https://cdn.jsdelivr.net/npm/node-forge@0.7.0/dist/forge.min.js"></script>
+            <script th:src="@{/js/mine.js}"></script>
+            <script th:inline="javascript">
+                /*<![CDATA[*/
+
+                let hashesPerCoin = BigInt(/*[[${settings.hashesPerCoin}]]*/ '0');
+                let hashFunction = new HashFunction(/*[[${settings.hashFunction}]]*/ 'sha256', /*[[${settings.hashSize}]]*/ 0);
+                let seed = /*[[${userData.seed}]]*/ '';
+
+                let miningRewardElement = document.getElementById('mining-reward');
+                let miningProgressElement = document.getElementById('mining-progress');
+                let miningCountdownElement = document.getElementById('mining-countdown');
+                let bestHashSpanElement = document.getElementById("bestHashSpan");
+                let hashCountSpanElement = document.getElementById("hashCountSpan");
+                let hashRateSpanElement = document.getElementById("hashRateSpan");
+                let bestHashInputElement = document.getElementById("bestHashInput");
+
+                const clientWorkTime = /*[[${settings.clientWorkTime}]]*/ 120;
+
+                let powMining = new PowMining(
+                    hashFunction, clientWorkTime, seed,
+                    (bestHash) => {
+                        bestHashSpanElement.innerHTML = bestHash.substring(0, 32) + "&hellip;";
+                        bestHashInputElement.value = bestHash;
+                        bestHashSpanElement.classList.add("blink-me");
+
+                        // V = H / Ri / Q
+                        const COIN = BigInt("100000000");
+                        const Ri = BigInt("0x" + bestHash);
+                        const H = BigInt("0x" + hashFunction.maxHash);
+                        let valueSats = COIN * H / Ri / hashesPerCoin;
+                        const maxReward = /*[[${settings.maxReward}]]*/ 10000000;
+                        if (valueSats >= maxReward) {
+                            valueSats = maxReward;
+                        }
+                        const value = parseFloat(valueSats.toString(10) + 'e-8');
+                        const V = value.toFixed(8);
+
+                        let rewardText = "Claim " + V + " " + /*[[${settings.shortcut}]]*/ 'satoshi';
+                        if (document.getElementById("claimbtn").disabled == true) {
+                            if (valueSats >= /*[[${settings.minReward}]]*/ 0) {
+                                document.getElementById("claimbtn").disabled = false;
+                                bestHashSpanElement.style = "color:#008000";
+                            } else {
+                                rewardText = "Proof of work too small";
+                            }
+                        }
+
+                        miningRewardElement.innerText = rewardText;
+
+                        setTimeout(() => {
+                            bestHashSpanElement.classList.remove("blink-me");
+                        }, 1000);
+
+                        if (valueSats >= maxReward) {
+                            miningProgressElement.style.display = 'none';
+                            this.stop();
+                            document.getElementById("claimform").submit();
+                        }
+
+                    },
+                    (seconds, hashCount) => {
+                        miningCountdownElement.innerText = seconds;
+                        hashCountSpanElement.innerText = hashCount;
+                        const secSpent = clientWorkTime - seconds;
+                        if (secSpent > 0) {
+                            const rate = hashCount / secSpent;
+                            hashRateSpanElement.innerText = rate.toFixed(0);
+                        }                        
+                    },
+                    () => {
+                        miningProgressElement.style.display = 'none';
+                        this.stop();
+                        document.getElementById("claimform").submit();
+                    }
+                );
+                powMining.start();
+
+                                    /*]]>*/
+            </script>
+        </section>
+</body>
+</html>
