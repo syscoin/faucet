@@ -3,7 +3,7 @@
 <head>
     <title th:text="${settings.coinName} + ' PoW Faucet'"></title>
     <link rel="shortcut icon" th:href="@{'/img/' + ${settings.coinName} + '.png'}">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <meta charset="utf-8"/>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
           integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
@@ -18,7 +18,7 @@
 <body>
 
 <header layout:fragment="header">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <div>
                 <img title="Faucet logo" th:src="@{'/img/' + ${settings.coinName} + '.png'}" width="30" style="position: relative;top:-4px;"
@@ -29,11 +29,11 @@
                 <a th:href="${settings.urlOther}">Switch to <span th:text="${settings.urlOtherName}"></span> Faucet</a>
             </div>
         </div>
-    </nav>
+    </nav> -->
 </header>
 
-<div class="container">
-    <section layout:fragment="content">
+<div class="container-full">
+    <section layout:fragment="content"> 
         <p>Content</p>
     </section>
 
