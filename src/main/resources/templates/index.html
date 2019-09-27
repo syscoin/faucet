@@ -3,77 +3,235 @@
 <head>
 </head>
 <body>
+
+
+
+        
+
+
+
+
+
+
 <section layout:fragment="content">
+    <div class="background">
+        <div class="intro">
+            <div class="left">
 
-    <div th:if="${claim}" class="alert alert-success">
-        We have sent you <span th:text="${claim.reward}"></span> <span th:text="${settings.shortcut}"></span> to <strong th:text="${claim.targetAddress}"></strong>
-        in transaction <strong th:text="${claim.txid}"></strong>.
-    </div>
+                    <a href="https://syscoin.org/" target="_blank" class="logo"></a>
+                    <h1>Syscoin PoW faucet</h1>
 
-    <div th:if="${errorMessage}" class="alert alert-warning">
-        <strong>Error #<span th:text="${errorCode}"></span></strong> <span th:text="${errorMessage}"></span>
-    </div>
-
-    <form th:action="@{/mine}" method="post" th:object="${addressForm}">
-        <table class="col-sm-7" style="margin:auto;">
-            <tr>
-                <td>
-                    <div class="input-group">
-                        <input type="text"
-                               th:field="*{address}"
-                               class="form-control"
-                               autofocus="autofocus"
-                               th:placeholder="${settings.coinName} + ' address'">
-
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-primary ">
-                                <i class="fa fa-cog"></i> Start
-                            </button>
-                        </div>
+                    <div class="faucet-logo">
+                            <img src="img/faucet.png">
+                            <p><span th:text="${settings.coinName}"></span> Faucet is a proof of work faucet inspired by <a href="https://en.wikipedia.org/wiki/Hashcash">Hashcash</a>.
+                            </p>
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <span th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="form-error-msg">Address Error</span><span>&nbsp;</span>
-                </td>
-            </tr>
-        </table>
-    </form>
+                    
+      
+                    <div class="bottom">
+            
+                      <a href="#how-it-works">
+                        <i class="demo-icon icon-cog"></i> How it works?
+                      </a>
+      
+      
+                      <a href="#information">
+                        <i class="demo-icon icon-info"></i> More information
+                      </a>
+                    </div>
 
-    <div class="col-xs-12" style="height:15px;"></div>
+            </div>
 
-    <p class="text-justify"><span th:text="${settings.coinName}"></span> Faucet is a proof of work faucet inspired by <a href="https://en.wikipedia.org/wiki/Hashcash">Hashcash</a>. Draining of
-        the faucet is prevented by requiring the user to provide a proof of work over a server created challenge and through limiting frequency of sessions from each IP address.
-        The more work the user proves, the more coins the server sends. The user can thus obtain a small amount
-        of coins fairly quickly or they can decide to let their computer calculate slightly longer in order to get more
-        coins. All basic parameters and limits are configurable on the server.</p>
+            <div class="right">
 
-    <p>The faucet operates in following steps:</p>
+                    <form  class="full" th:action="@{/mine}" method="post" th:object="${addressForm}">
+                        <table class="col-sm-7 col-10" style="margin:auto;">
+                            <tr>
+                                <td class="somespace">
+                                        <img title="Faucet logo" th:src="@{'/img/' + ${settings.coinName} + '.png'}" width="30" style="position: relative;top:-6px; margin-right:12px"
+                                        height="30" /><a class="title" href="/"><span th:text="${settings.coinName}"></span> Faucet</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="input-group">
+                                        <input type="text"
+                                               th:field="*{address}"
+                                               class="form-control"
+                                               autofocus="autofocus"
+                                               th:placeholder="${settings.coinName} + ' address'">
+                
+                                        <div class="input-group-append">
+                                            <button type="submit" class="btn btn-primary ">
+                                                <i class="fa fa-cog"></i> Start
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="form-error-msg">Address Error</span><span>&nbsp;</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="somespace"> 
+                                    <a class="subtitle" th:href="${settings.urlOther}">Switch to <span th:text="${settings.urlOtherName}"></span> Faucet</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="somespace"> 
+                                    <div th:if="${claim}" class="alert alert-success">
+                                        We have sent you <span th:text="${claim.reward}"></span> <span th:text="${settings.shortcut}"></span> to <strong th:text="${claim.targetAddress}"></strong>
+                                        in transaction <strong th:text="${claim.txid}"></strong>.
+                                    </div>
+                                
+                                    <div th:if="${errorMessage}" class="alert alert-warning">
+                                        <strong>Error #<span th:text="${errorCode}"></span></strong> <span th:text="${errorMessage}"></span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
 
-    <ol>
-        <li>The user requests the main page, fills in the target <span th:text="${settings.shortcut}"></span> address and submits the form.</li>
-        <li class="text-justify">
-            The server creates a session for the user which consists of the user's IP address, the target <span th:text="${settings.shortcut}"></span> address <span class="math-term">A</span>, the timestamp <span class="math-term">T</span>, and a random challenge <span class="math-term">C</span>.
-            The server sends the challenge <span class="math-term">C</span> back to the user.
-        </li>
-        <li class="text-justify">The user starts to calculate responses <span class="math-term">R<sub>i</sub> = SHA512(i | C)</span> while incrementing the nonce
-            <span class="math-term">i</span>. The user keeps the lowest <span class="math-term">R<sub>i</sub></span> value as its best result.
-            As long as the best result is lower than the required limit for the minimal payout, the user can end the computation at any time by
-            submitting the results to the server. The submission of the result includes the challenge <span class="math-term">C</span> and
-            the nonce <span class="math-term">i</span>. If the user does not stop the computation, the client script tries to find the best solution
-            for <span th:text="${settings.clientWorkTime}"></span> seconds and then submits the best result automatically. The client script also stops the computation and submits the result if the minimal hash, which guarantees the maximal payout, is reached.</li>
-        <li class="text-justify">Given the user's IP address, challenge <span class="math-term">C</span> and nonce <span class="math-term">i</span>, the server can look up the session of the user in its in-memory database,
-            from which it checks that the challenge still exists, the
-            timestamp <span class="math-term">T</span> is not older than the maximal submission time (<span th:text="${settings.maxSessionTime}"></span> seconds), and that
-            <span class="math-term">R<sub>i</sub> = <span th:text="${settings.hashFunction.toUpperCase()}"></span>(i | C)</span> is below the configurable minimum required limit for the minimal payout. Then the
-            server calculates the number of coins <span class="math-term">V</span> to send to the user's address <span class="math-term">A</span> using
-            formula <span class="math-term">V = ((2<sup th:text="${settings.hashSize}"></sup> - 1) / R<sub>i</sub>) / Q</span>, where <span class="math-term">Q</span> is configurable coefficient
-            that specifies how many hashes is the user expected to calculate to be rewarded with 1 <span th:text="${settings.shortcut}"></span>.
-            The server then marks the user's session in its in-memory database as completed.</li>
-    </ol>
+                    
 
-    <p class="text-justify">The session is evicted from the server's in-memory database after the maximal submission time. If the user submits the form before the previous session is completed, a new session is created. However, if the previous session is completed, the user is not allowed to create a new session until the previous one is evicted.</p>
+                    <div class="links">
+                        <a href="https://twitter.com/syscoin" target="_blank" title="Twitter">
+                            <i class="demo-icon icon-twitter"></i>
+                        </a>
+                        <a href="https://t.me/Syscoin_Official" target="_blank" title="Telegram">
+                            <i class="demo-icon icon-icon-telegram"></i>
+                        </a>
+                        <a href="https://discord.gg/RkK2AXD" target="_blank" title="Discord">
+                            <i class="demo-icon icon-discord-logo-white"></i>
+                        </a>
+                        <a href="https://www.reddit.com/r/SysCoin/" target="_blank" title="Reddit">
+                            <i class="demo-icon icon-reddit-alien"></i>
+                        </a>
+                        <a href="https://github.com/syscoin" target="_blank" title="Github">
+                            <i class="demo-icon icon-github-circled"></i>
+                        </a>
+                        <a href="https://syscoin.org" target="_blank" title="Syscoin.org">
+                            <i class="demo-icon icon-sys"></i>
+                        </a>
+                    </div>
+
+
+            </div>
+        </div>
+
+
+
+
+
+
+        <div class="section">
+                <div class="howitworks">
+                  <a class="anchor" name="how-it-works"></a>
+                  <div class="ornament"></div>
+                  <h1>How it works?</h1>
+
+                     
+                  <p class="italic">
+                        <span th:text="${settings.coinName}"></span> Faucet is a proof of work faucet inspired by <a href="https://en.wikipedia.org/wiki/Hashcash">Hashcash</a>.
+                  </p>
+
+                  <p>Draining of
+                    the faucet is prevented by requiring the user to provide a proof of work over a server created challenge and through limiting frequency of sessions from each IP address.
+                    The more work the user proves, the more coins the server sends. The user can thus obtain a small amount
+                    of coins fairly quickly or they can decide to let their computer calculate slightly longer in order to get more
+                    coins. All basic parameters and limits are configurable on the server.</p>
+      
+                  <div class="ornament intext"></div>
+      
+                  <h2>How The faucet operates?</h2>
+                        
+                  <ol>
+                        <li>The user requests the main page, fills in the target <span th:text="${settings.shortcut}"></span> address and submits the form.</li>
+                        <li class="text-justify">
+                            The server creates a session for the user which consists of the user's IP address, the target <span th:text="${settings.shortcut}"></span> address <span class="math-term">A</span>, the timestamp <span class="math-term">T</span>, and a random challenge <span class="math-term">C</span>.
+                            The server sends the challenge <span class="math-term">C</span> back to the user.
+                        </li>
+                        <li class="text-justify">The user starts to calculate responses <span class="math-term">R<sub>i</sub> = SHA512(i | C)</span> while incrementing the nonce
+                            <span class="math-term">i</span>. The user keeps the lowest <span class="math-term">R<sub>i</sub></span> value as its best result.
+                            As long as the best result is lower than the required limit for the minimal payout, the user can end the computation at any time by
+                            submitting the results to the server. The submission of the result includes the challenge <span class="math-term">C</span> and
+                            the nonce <span class="math-term">i</span>. If the user does not stop the computation, the client script tries to find the best solution
+                            for <span th:text="${settings.clientWorkTime}"></span> seconds and then submits the best result automatically. The client script also stops the computation and submits the result if the minimal hash, which guarantees the maximal payout, is reached.</li>
+                        <li class="text-justify">Given the user's IP address, challenge <span class="math-term">C</span> and nonce <span class="math-term">i</span>, the server can look up the session of the user in its in-memory database,
+                            from which it checks that the challenge still exists, the
+                            timestamp <span class="math-term">T</span> is not older than the maximal submission time (<span th:text="${settings.maxSessionTime}"></span> seconds), and that
+                            <span class="math-term">R<sub>i</sub> = <span th:text="${settings.hashFunction.toUpperCase()}"></span>(i | C)</span> is below the configurable minimum required limit for the minimal payout. Then the
+                            server calculates the number of coins <span class="math-term">V</span> to send to the user's address <span class="math-term">A</span> using
+                            formula <span class="math-term">V = ((2<sup th:text="${settings.hashSize}"></sup> - 1) / R<sub>i</sub>) / Q</span>, where <span class="math-term">Q</span> is configurable coefficient
+                            that specifies how many hashes is the user expected to calculate to be rewarded with 1 <span th:text="${settings.shortcut}"></span>.
+                            The server then marks the user's session in its in-memory database as completed.</li>
+                    </ol>
+                
+                    <p class="text-justify">The session is evicted from the server's in-memory database after the maximal submission time. If the user submits the form before the previous session is completed, a new session is created. However, if the previous session is completed, the user is not allowed to create a new session until the previous one is evicted.</p>
+      
+                </div>
+              </div>
+
+
+
+
+              <div class="section dark moreinfo">
+                    <div class="moreinfo">
+                      <a class="anchor" name="information"></a>
+                      <div class="ornament none"></div>
+                      <h1>More information</h1>
+          
+                      <div class="links">
+                        <a href="https://syscoin.org" target="_blank">Syscoin.org</a>
+                        <a href="https://syscoin.network/syslinks/" target="_blank">Syscoin links</a>
+                        <a href="https://syscoin.readme.io/" target="_blank">Developer Portal</a>
+                        <a href="http://explorer.blockchainfoundry.co/" target="_blank">Syscoin explorer</a>
+                        <a href="https://syscoin.org/whitepaper" target="_blank">Syscoin Whitepapers</a>
+                        <a href="https://github.com/syscoin" target="_blank">Syscoin Github</a>
+                      </div>
+          
+                      <div class="linksSocial">
+                          <a href="https://twitter.com/syscoin" target="_blank" title="Twitter">
+                            <i class="demo-icon icon-twitter"></i>
+                          </a>
+                          <a href="https://t.me/Syscoin_Official" target="_blank" title="Telegram">
+                            <i class="demo-icon icon-icon-telegram"></i>
+                          </a>
+                          <a href="https://discord.gg/RkK2AXD" target="_blank" title="Discord">
+                            <i class="demo-icon icon-discord-logo-white"></i>
+                          </a>
+                          <a href="https://www.reddit.com/r/SysCoin/" target="_blank" title="Reddit">
+                            <i class="demo-icon icon-reddit-alien"></i>
+                          </a>
+                          <a href="https://github.com/syscoin" target="_blank" title="Github">
+                            <i class="demo-icon icon-github-circled"></i>
+                          </a>
+                          <a href="https://syscoin.org" target="_blank" title="Syscoin.org">
+                            <i class="demo-icon icon-sys"></i>
+                          </a>
+                      </div>
+          
+                      <div class="general">© 2019 Syscoin. All rights reserved</div>
+          
+                    </div>
+                  </div>
+
+
+
+
+
+
+
+    </div>
+
+    
+
+    
+    
+
+    
 </section>
 
 <section layout:fragment="js">
