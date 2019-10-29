@@ -1,3 +1,10 @@
+# Requirement
+
+```bash
+sudo apt-get install oracle-java13-installer
+sudo apt-get install oracle-java13-set-default
+```
+
 # Build
 
 ```bash
