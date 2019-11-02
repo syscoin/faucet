@@ -1382,3 +1382,18 @@ code
         top:-200vh;
     }
 }
+
+@media (max-height:700px) and (orientation: landscape)
+{
+    .intro .left .faucet-logo {
+        margin-top: 50px;
+    }
+}
+
+@media (max-height:650px) and (orientation: landscape)
+{
+    .intro .left .faucet-logo {
+        margin-top: 0px;
+    }
+}
+
