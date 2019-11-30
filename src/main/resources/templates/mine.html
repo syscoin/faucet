@@ -80,8 +80,8 @@
 
                         // V = H / Ri / Q
                         const COIN = bigInt("100000000");
-                        const Ri = bigInt("0x" + bestHash);
-                        const H = bigInt("0x" + hashFunction.maxHash);
+                        const Ri = bigInt(bestHash, 16);
+                        const H = bigInt(hashFunction.maxHash, 16);
                         const COINH = COIN.multiply(H);
                         let valueSats = COINH.divide(Ri).divide(hashesPerCoin);
                         const maxReward = /*[[${settings.maxReward}]]*/ 10000000;
