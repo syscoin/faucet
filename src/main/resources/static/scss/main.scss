@@ -81,6 +81,8 @@ html {
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#1e3863",endColorstr="#19195a",GradientType=1); 
     background-size: cover;
     overflow:hidden;
+    padding-bottom: 50px;
+    overflow-y: scroll;
     background-attachment: fixed;
 }
 
