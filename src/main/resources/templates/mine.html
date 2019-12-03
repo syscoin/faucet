@@ -51,12 +51,13 @@
         </section>
 
         <section layout:fragment="js">
-            <script src="https://cdn.jsdelivr.net/npm/node-forge@0.7.0/dist/forge.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/node-forge@0.9.1/dist/forge.min.js"></script>
+            <script src="https://peterolson.github.io/BigInteger.js/BigInteger.min.js"></script>
             <script th:src="@{/js/mine.js}"></script>
             <script th:inline="javascript">
                 /*<![CDATA[*/
 
-                let hashesPerCoin = BigInt(/*[[${settings.hashesPerCoin}]]*/ '0');
+                let hashesPerCoin = bigInt(/*[[${settings.hashesPerCoin}]]*/ '0');
                 let hashFunction = new HashFunction(/*[[${settings.hashFunction}]]*/ 'sha256', /*[[${settings.hashSize}]]*/ 0);
                 let seed = /*[[${userData.seed}]]*/ '';
 
@@ -78,10 +79,11 @@
                         bestHashSpanElement.classList.add("blink-me");
 
                         // V = H / Ri / Q
-                        const COIN = BigInt("100000000");
-                        const Ri = BigInt("0x" + bestHash);
-                        const H = BigInt("0x" + hashFunction.maxHash);
-                        let valueSats = COIN * H / Ri / hashesPerCoin;
+                        const COIN = bigInt("100000000");
+                        const Ri = bigInt(bestHash, 16);
+                        const H = bigInt(hashFunction.maxHash, 16);
+                        const COINH = COIN.multiply(H);
+                        let valueSats = COINH.divide(Ri).divide(hashesPerCoin);
                         const maxReward = /*[[${settings.maxReward}]]*/ 10000000;
                         if (valueSats >= maxReward) {
                             valueSats = maxReward;
